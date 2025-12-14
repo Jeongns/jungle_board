@@ -4,6 +4,7 @@ import { LocalAuthGuard } from './guard/local-auth.guard';
 import { Public } from './decorators/public.decorator';
 import { User } from './decorators/user.decorator';
 import type { AuthenticatedUser } from 'src/common/types/authenticated-user';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -11,7 +12,7 @@ export class AuthController {
 
   @Public()
   @Post('register')
-  async register(@Body() body) {
+  async register(@Body() body: CreateUserDto) {
     return this.authService.register(body);
   }
 
