@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { ExamModule } from './exam/exam.module';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
@@ -11,7 +10,6 @@ import { JwtAuthGuard } from './auth/guard/jwt-auth.guard';
   imports: [
     ConfigModule.forRoot({ envFilePath: '.env' }),
     PrismaModule,
-    ExamModule,
     AuthModule,
     UsersModule,
   ],
