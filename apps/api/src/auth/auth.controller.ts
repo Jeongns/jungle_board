@@ -1,4 +1,4 @@
-import { Controller, Post, UseGuards, Get, Body } from '@nestjs/common';
+import { Controller, Post, UseGuards, Get, Body, Logger } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guard/local-auth.guard';
 import { Public } from './decorators/public.decorator';
@@ -8,11 +8,13 @@ import { CreateUserDto } from 'src/users/dto/create-user.dto';
 
 @Controller('auth')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
   constructor(private authService: AuthService) {}
 
   @Public()
   @Post('register')
   async register(@Body() body: CreateUserDto) {
+    this.logger.log(`Registering user with email: ${body.email}`);
     return this.authService.register(body);
   }
 
@@ -20,6 +22,7 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   login(@User() user: AuthenticatedUser) {
+    this.logger.log(`Logging in user with id: ${user.id}`);
     return this.authService.login(user);
   }
 
