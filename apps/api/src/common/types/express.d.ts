@@ -1,9 +1,9 @@
 import { Request } from 'express';
-import { AuthUserDto } from 'src/auth/dto/auth-user.dto';
+import { AuthenticatedUser } from './authenticated-user';
 
 declare global {
   namespace Express {
     // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-    interface User extends AuthUserDto {}
+    interface User extends AuthenticatedUser {}
   }
 }

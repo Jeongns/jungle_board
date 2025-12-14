@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guard/local-auth.guard';
 import { Public } from './decorators/public.decorator';
 import { User } from './decorators/user.decorator';
-import { AuthUserDto } from './dto/auth-user.dto';
+import type { AuthenticatedUser } from 'src/common/types/authenticated-user';
 
 @Controller('auth')
 export class AuthController {
@@ -18,12 +18,12 @@ export class AuthController {
   @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  login(@User() user: AuthUserDto) {
+  login(@User() user: AuthenticatedUser) {
     return this.authService.login(user);
   }
 
   @Get('profile')
-  getProfile(@User() user: AuthUserDto) {
+  getProfile(@User() user: AuthenticatedUser) {
     return user;
   }
 }

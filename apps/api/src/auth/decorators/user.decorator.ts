@@ -1,8 +1,8 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { AuthUserDto } from '../dto/auth-user.dto';
+import { AuthenticatedUser } from 'src/common/types/authenticated-user';
 
 export const User = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext): AuthUserDto | null => {
+  (data: unknown, ctx: ExecutionContext): AuthenticatedUser | null => {
     const request = ctx.switchToHttp().getRequest<Express.Request>();
     if (!request.user) {
       return null;
