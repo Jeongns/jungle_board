@@ -4,7 +4,7 @@ import { LocalAuthGuard } from './guard/local-auth.guard';
 import { Public } from './decorators/public.decorator';
 import { User } from './decorators/user.decorator';
 import type { AuthenticatedUser } from 'src/common/types/authenticated-user';
-import { CreateUserRequest } from 'src/users/dto/create-user.dto';
+import { RegistUserRequest } from './dto/regist-user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -13,13 +13,13 @@ export class AuthController {
 
   @Public()
   @Post('register')
-  async register(@Body() createUserRequest: CreateUserRequest) {
-    this.logger.log(`Registering user with email: ${createUserRequest.email}`);
+  async register(@Body() registUserRequest: RegistUserRequest) {
+    this.logger.log(`Registering user with email: ${registUserRequest.email}`);
 
     await this.authService.register(
-      createUserRequest.email,
-      createUserRequest.email,
-      createUserRequest.password,
+      registUserRequest.email,
+      registUserRequest.email,
+      registUserRequest.password,
     );
   }
 

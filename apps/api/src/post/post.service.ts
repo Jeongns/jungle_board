@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { UpdatePostRequest } from './dto/update-post.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Post } from 'generated/prisma/browser';
+
 @Injectable()
 export class PostService {
   constructor(private readonly prisma: PrismaService) {}
