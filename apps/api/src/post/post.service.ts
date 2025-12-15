@@ -7,6 +7,7 @@ import { CreatePostRequest } from './dto/create-post.dto';
 import { UpdatePostRequest } from './dto/update-post.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Post } from 'generated/prisma/browser';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 
 @Injectable()
 export class PostService {
@@ -26,14 +27,9 @@ export class PostService {
   }
 
   async getPost(id: number): Promise<Post> {
-    const post = await this.prisma.post.findUnique({
+    const post = await this.prisma.post.findUniqueOrThrow({
       where: { id },
     });
-
-    if (!post) {
-      throw new NotFoundException('Post not found');
-    }
-
     return post;
   }
 
@@ -43,9 +39,6 @@ export class PostService {
     updatePostRequest: UpdatePostRequest,
   ): Promise<Post> {
     const post = await this.getPost(id);
-    if (!post) {
-      throw new NotFoundException('Post not found');
-    }
     if (post.authorId !== userId) {
       throw new ForbiddenException('You are not the author of this post');
     }
