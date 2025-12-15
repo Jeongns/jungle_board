@@ -18,11 +18,15 @@ export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
   @Post()
-  create(
+  async create(
     @User() user: AuthenticatedUser,
     @Body() createCommentRequest: CreateCommentRequest,
   ) {
-    return this.commentService.createComment(user.id, createCommentRequest);
+    await this.commentService.createComment(
+      user.id,
+      createCommentRequest.postId,
+      createCommentRequest.content,
+    );
   }
 
   @Get(':id')
@@ -39,7 +43,7 @@ export class CommentController {
     return this.commentService.updateComment(
       +id,
       user.id,
-      updateCommentRequest,
+      updateCommentRequest.content,
     );
   }
 

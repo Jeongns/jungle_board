@@ -1,6 +1,4 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { CreateCommentRequest } from './dto/create-comment.dto';
-import { UpdateCommentRequest } from './dto/update-comment.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Comment } from 'generated/prisma/browser';
 
@@ -10,13 +8,14 @@ export class CommentService {
 
   createComment(
     userId: number,
-    createCommentRequest: CreateCommentRequest,
+    postId: number,
+    content: string,
   ): Promise<Comment> {
     return this.prisma.comment.create({
       data: {
-        postId: createCommentRequest.postId,
+        postId: postId,
         userId: userId,
-        content: createCommentRequest.content,
+        content: content,
       },
     });
   }
@@ -25,9 +24,7 @@ export class CommentService {
     return this.prisma.comment.findUniqueOrThrow({ where: { id } });
   }
 
-  async getCommentsByPostId(
-    postId: number,
-  ): Promise<(Comment & { User: { username: string } })[]> {
+  async getCommentsByPostId(postId: number) {
     const post = await this.prisma.post.findUniqueOrThrow({
       where: {
         id: postId,
@@ -42,7 +39,7 @@ export class CommentService {
   async updateComment(
     id: number,
     userId: number,
-    updateCommentRequest: UpdateCommentRequest,
+    content: string,
   ): Promise<Comment> {
     const comment = await this.getComment(id);
     if (comment.id != userId) {
@@ -51,7 +48,7 @@ export class CommentService {
 
     return this.prisma.comment.update({
       where: { id },
-      data: { content: updateCommentRequest.content },
+      data: { content: content },
     });
   }
 
