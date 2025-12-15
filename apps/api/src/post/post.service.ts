@@ -25,7 +25,7 @@ export class PostService {
     });
   }
 
-  async findPost(id: number): Promise<Post> {
+  async getPost(id: number): Promise<Post> {
     const post = await this.prisma.post.findUnique({
       where: { id },
     });
@@ -42,7 +42,7 @@ export class PostService {
     userId: number,
     updatePostRequest: UpdatePostRequest,
   ): Promise<Post> {
-    const post = await this.findPost(id);
+    const post = await this.getPost(id);
     if (!post) {
       throw new NotFoundException('Post not found');
     }

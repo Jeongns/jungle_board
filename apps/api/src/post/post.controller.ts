@@ -12,7 +12,7 @@ import { CreatePostRequest } from './dto/create-post.dto';
 import { UpdatePostRequest } from './dto/update-post.dto';
 import { User } from 'src/auth/decorators/user.decorator';
 import type { AuthenticatedUser } from 'src/common/types/authenticated-user';
-import { FindPostResponse } from './dto/find-post.dto';
+import { GetPostResponse } from './dto/get-post.dto';
 
 @Controller('post')
 export class PostController {
@@ -31,8 +31,8 @@ export class PostController {
     @User() user: AuthenticatedUser,
     @Param('id') id: string,
   ) {
-    const post = await this.postService.findPost(+id);
-    return new FindPostResponse(user.id, post);
+    const post = await this.postService.getPost(+id);
+    return new GetPostResponse(user.id, post);
   }
 
   @Patch(':id')

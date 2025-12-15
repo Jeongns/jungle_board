@@ -1,6 +1,6 @@
 import { Post } from 'generated/prisma/client';
 
-export class FindPostResponse {
+export class GetPostResponse {
   constructor(UserId: number, post: Post) {
     this.isMine = post.authorId === UserId;
     this.id = post.id;
