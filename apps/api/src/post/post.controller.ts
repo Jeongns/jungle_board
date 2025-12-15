@@ -19,11 +19,15 @@ export class PostController {
   constructor(private readonly postService: PostService) {}
 
   @Post()
-  createPost(
+  async createPost(
     @User() user: AuthenticatedUser,
     @Body() createPostRequest: CreatePostRequest,
   ) {
-    return this.postService.createPost(user.id, createPostRequest);
+    await this.postService.createPost(
+      user.id,
+      createPostRequest.title,
+      createPostRequest.content,
+    );
   }
 
   @Get(':id')
@@ -32,20 +36,25 @@ export class PostController {
     @Param('id') id: string,
   ) {
     const post = await this.postService.getPost(+id);
-    return new GetPostResponse(user.id, post);
+    return GetPostResponse.postToDto(user.id, post);
   }
 
   @Patch(':id')
-  update(
+  async update(
     @User() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() updatePostRequest: UpdatePostRequest,
   ) {
-    return this.postService.updatePost(+id, user.id, updatePostRequest);
+    await this.postService.updatePost(
+      +id,
+      user.id,
+      updatePostRequest.title,
+      updatePostRequest.content,
+    );
   }
 
   @Delete(':id')
-  remove(@User() user: AuthenticatedUser, @Param('id') id: string) {
-    return this.postService.removePost(+id, user.id);
+  async remove(@User() user: AuthenticatedUser, @Param('id') id: string) {
+    await this.postService.removePost(+id, user.id);
   }
 }

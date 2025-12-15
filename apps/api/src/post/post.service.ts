@@ -1,5 +1,4 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { CreatePostRequest } from './dto/create-post.dto';
 import { UpdatePostRequest } from './dto/update-post.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Post } from 'generated/prisma/browser';
@@ -7,14 +6,11 @@ import { Post } from 'generated/prisma/browser';
 export class PostService {
   constructor(private readonly prisma: PrismaService) {}
 
-  createPost(
-    userId: number,
-    createPostRequest: CreatePostRequest,
-  ): Promise<Post> {
+  createPost(userId: number, title: string, content: string): Promise<Post> {
     return this.prisma.post.create({
       data: {
-        title: createPostRequest.title,
-        content: createPostRequest.content,
+        title: title,
+        content: content,
         authorId: userId,
       },
     });
@@ -30,7 +26,8 @@ export class PostService {
   async updatePost(
     id: number,
     userId: number,
-    updatePostRequest: UpdatePostRequest,
+    title: string,
+    content: string,
   ): Promise<Post> {
     const post = await this.getPost(id);
     if (post.authorId !== userId) {
@@ -40,8 +37,8 @@ export class PostService {
     return this.prisma.post.update({
       where: { id },
       data: {
-        title: updatePostRequest.title,
-        content: updatePostRequest.content,
+        title: title,
+        content: content,
       },
     });
   }

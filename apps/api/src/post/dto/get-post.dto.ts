@@ -1,20 +1,24 @@
-import { Post } from 'generated/prisma/client';
+import { Post } from 'generated/prisma/browser';
 
 export class GetPostResponse {
-  constructor(UserId: number, post: Post) {
-    this.isMine = post.authorId === UserId;
-    this.id = post.id;
-    this.title = post.title;
-    this.content = post.content;
-    this.authorId = post.authorId;
-    this.createdAt = post.createdAt;
-    this.updatedAt = post.updatedAt;
+  static postToDto(userId: number, post: Post) {
+    return new GetPostResponse(
+      userId == post.authorId,
+      post.id,
+      post.title,
+      post.content,
+      post.authorId,
+      post.createdAt,
+      post.updatedAt,
+    );
   }
-  isMine: boolean;
-  id: number;
-  title: string;
-  content: string;
-  authorId: number;
-  createdAt: Date;
-  updatedAt: Date;
+  constructor(
+    public isMine: boolean,
+    public id: number,
+    public title: string,
+    public content: string,
+    public authorId: number,
+    public createdAt: Date,
+    public updatedAt: Date,
+  ) {}
 }
