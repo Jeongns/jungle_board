@@ -8,6 +8,10 @@ export class BoardController {
 
   @Get()
   getPaginatedPosts(@Query() boardPageReqeust: BoardPageReqeust) {
-    return this.boardService.getPaginatedPosts(boardPageReqeust);
+    return this.boardService.getPaginatedPosts(
+      boardPageReqeust.search,
+      boardPageReqeust.page,
+      boardPageReqeust.limit,
+    );
   }
 }

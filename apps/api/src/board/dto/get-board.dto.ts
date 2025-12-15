@@ -1,5 +1,6 @@
 import { IsNumber, IsOptional } from 'class-validator';
 import { Post, User } from 'generated/prisma/browser';
+import { Pagination } from 'src/common/types/pagination';
 
 export class BoardPageReqeust {
   @IsOptional()
@@ -12,24 +13,26 @@ export class BoardPageReqeust {
   limit: number = 10;
 }
 
-export class BoardPageReponse {
-  constructor(
+export class BoardPageReponse implements Pagination<PageInfo> {
+  static paginatedPostsToDto(
     page: number,
     totalCount: number,
     limit: number,
-    items: (Post & { author: User })[],
+    posts: (Post & { author: User })[],
   ) {
-    this.page = page;
-    this.totalCount = totalCount;
-    this.limit = limit;
-    items.map((item) =>
-      this.items.push(new PageInfo(item.id, item.title, item.author.username)),
+    return new Pagination<PageInfo>(
+      page,
+      totalCount,
+      limit,
+      posts.map(
+        (item) => new PageInfo(item.id, item.title, item.author.username),
+      ),
     );
   }
   page: number;
-  items: PageInfo[];
   totalCount: number;
   limit: number;
+  items: PageInfo[];
 }
 
 class PageInfo {

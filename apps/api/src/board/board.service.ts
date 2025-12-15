@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { BoardPageReponse, BoardPageReqeust } from './dto/get-board.dto';
+import { BoardPageReponse } from './dto/get-board.dto';
 import { Post, User } from 'generated/prisma/browser';
 
 @Injectable()
 export class BoardService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getPaginatedPosts(boardPageReqeust: BoardPageReqeust) {
-    const search = boardPageReqeust.search ?? '';
-    const safePage = Math.max(1, boardPageReqeust?.page ?? 1);
-    const safeLimit = Math.max(1, boardPageReqeust?.limit ?? 10);
+  async getPaginatedPosts(search: string, page: number, limit: number) {
+    const safeSearch = search ?? '';
+    const safePage = Math.max(1, page ?? 1);
+    const safeLimit = Math.max(1, limit ?? 10);
     const skip = (safePage - 1) * safeLimit;
 
     const [items, totalCount] = await this.prisma.$transaction([
@@ -23,12 +23,12 @@ export class BoardService {
         skip: skip,
         take: safeLimit,
         orderBy: { createdAt: 'desc' },
-        where: { title: { contains: search } },
+        where: { title: { contains: safeSearch } },
       }),
       this.prisma.post.count(),
     ]);
 
-    return new BoardPageReponse(
+    return BoardPageReponse.paginatedPostsToDto(
       safePage,
       totalCount,
       safeLimit,
