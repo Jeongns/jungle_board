@@ -15,7 +15,12 @@ export class AuthController {
   @Post('register')
   async register(@Body() createUserRequest: CreateUserRequest) {
     this.logger.log(`Registering user with email: ${createUserRequest.email}`);
-    return this.authService.register(createUserRequest);
+
+    await this.authService.register(
+      createUserRequest.email,
+      createUserRequest.email,
+      createUserRequest.password,
+    );
   }
 
   @Public()
@@ -23,7 +28,7 @@ export class AuthController {
   @Post('login')
   login(@User() user: AuthenticatedUser) {
     this.logger.log(`Logging in user with id: ${user.id}`);
-    return this.authService.login(user);
+    return this.authService.getJwtToken(user);
   }
 
   @Get('profile')

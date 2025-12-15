@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt/dist/jwt.service';
 import { UsersService } from 'src/users/users.service';
-import { CreateUserRequest } from 'src/users/dto/create-user.dto';
 import { AuthenticatedUser } from 'src/common/types/authenticated-user';
 import * as bcrypt from 'bcrypt';
+import { User } from 'generated/prisma/browser';
 
 @Injectable()
 export class AuthService {
@@ -12,18 +12,21 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async register(userDto: CreateUserRequest): Promise<AuthenticatedUser> {
-    const duplicateUser = await this.usersService.findOneByEmail(userDto.email);
+  async register(
+    email: string,
+    username: string,
+    password: string,
+  ): Promise<User> {
+    const duplicateUser = await this.usersService.findOneByEmail(email);
+
     if (duplicateUser) {
       throw new BadRequestException('User already exists');
     }
 
     const salt = await bcrypt.genSalt();
-    const hash = await bcrypt.hash(userDto.password, salt);
-    userDto.password = hash;
+    const hash = await bcrypt.hash(password, salt);
 
-    const user = await this.usersService.createUser(userDto);
-    return { id: user.id, username: user.username };
+    return this.usersService.createUser(email, username, hash);
   }
 
   async validateUser(
@@ -31,13 +34,15 @@ export class AuthService {
     password: string,
   ): Promise<AuthenticatedUser | null> {
     const user = await this.usersService.findOneByEmail(email);
+
     if (user && (await bcrypt.compare(password, user.password))) {
       return { id: user.id, username: user.username };
     }
+
     return null;
   }
 
-  login(user: AuthenticatedUser) {
+  getJwtToken(user: AuthenticatedUser) {
     const payload = { username: user.username, sub: user.id };
     return {
       access_token: this.jwtService.sign(payload),
