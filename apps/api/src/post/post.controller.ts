@@ -19,11 +19,11 @@ export class PostController {
   constructor(private readonly postService: PostService) {}
 
   @Post()
-  async createPost(
+  createPost(
     @User() user: AuthenticatedUser,
     @Body() createPostRequest: CreatePostRequest,
   ) {
-    await this.postService.createPost(
+    return this.postService.createPost(
       user.id,
       createPostRequest.title,
       createPostRequest.content,
@@ -40,12 +40,12 @@ export class PostController {
   }
 
   @Patch(':id')
-  async update(
+  update(
     @User() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() updatePostRequest: UpdatePostRequest,
   ) {
-    await this.postService.updatePost(
+    return this.postService.updatePost(
       +id,
       user.id,
       updatePostRequest.title,
@@ -54,7 +54,7 @@ export class PostController {
   }
 
   @Delete(':id')
-  async remove(@User() user: AuthenticatedUser, @Param('id') id: string) {
-    await this.postService.removePost(+id, user.id);
+  remove(@User() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.postService.removePost(+id, user.id);
   }
 }

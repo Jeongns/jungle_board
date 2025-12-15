@@ -13,10 +13,10 @@ export class AuthController {
 
   @Public()
   @Post('register')
-  async register(@Body() registUserRequest: RegistUserRequest) {
+  register(@Body() registUserRequest: RegistUserRequest) {
     this.logger.log(`Registering user with email: ${registUserRequest.email}`);
 
-    await this.authService.register(
+    return this.authService.register(
       registUserRequest.email,
       registUserRequest.email,
       registUserRequest.password,

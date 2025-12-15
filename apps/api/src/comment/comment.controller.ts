@@ -18,11 +18,11 @@ export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
   @Post()
-  async create(
+  create(
     @User() user: AuthenticatedUser,
     @Body() createCommentRequest: CreateCommentRequest,
   ) {
-    await this.commentService.createComment(
+    return this.commentService.createComment(
       user.id,
       createCommentRequest.postId,
       createCommentRequest.content,
@@ -35,12 +35,12 @@ export class CommentController {
   }
 
   @Patch(':id')
-  async update(
+  update(
     @User() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() updateCommentRequest: UpdateCommentRequest,
   ) {
-    await this.commentService.updateComment(
+    return this.commentService.updateComment(
       +id,
       user.id,
       updateCommentRequest.content,
@@ -48,7 +48,7 @@ export class CommentController {
   }
 
   @Delete(':id')
-  async remove(@User() user: AuthenticatedUser, @Param('id') id: string) {
-    await this.commentService.removeComment(+id, user.id);
+  remove(@User() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.commentService.removeComment(+id, user.id);
   }
 }
