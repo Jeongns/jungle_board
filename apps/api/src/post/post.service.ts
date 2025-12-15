@@ -45,7 +45,10 @@ export class PostService {
 
     return this.prisma.post.update({
       where: { id },
-      data: updatePostRequest,
+      data: {
+        title: updatePostRequest.title,
+        content: updatePostRequest.content,
+      },
     });
   }
 
