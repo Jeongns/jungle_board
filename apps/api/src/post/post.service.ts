@@ -52,7 +52,12 @@ export class PostService {
     });
   }
 
-  removePost(id: number): Promise<Post> {
+  async removePost(id: number, userId: number): Promise<Post> {
+    const post = await this.getPost(id);
+    if (post.authorId !== userId) {
+      throw new ForbiddenException('You are not the author of this post');
+    }
+
     return this.prisma.post.delete({ where: { id } });
   }
 }

@@ -45,7 +45,7 @@ export class PostController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.postService.removePost(+id);
+  remove(@User() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.postService.removePost(+id, user.id);
   }
 }
