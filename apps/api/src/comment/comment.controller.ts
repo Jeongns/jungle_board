@@ -35,12 +35,12 @@ export class CommentController {
   }
 
   @Patch(':id')
-  update(
+  async update(
     @User() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() updateCommentRequest: UpdateCommentRequest,
   ) {
-    return this.commentService.updateComment(
+    await this.commentService.updateComment(
       +id,
       user.id,
       updateCommentRequest.content,
@@ -48,7 +48,7 @@ export class CommentController {
   }
 
   @Delete(':id')
-  remove(@User() user: AuthenticatedUser, @Param('id') id: string) {
-    return this.commentService.removeComment(+id, user.id);
+  async remove(@User() user: AuthenticatedUser, @Param('id') id: string) {
+    await this.commentService.removeComment(+id, user.id);
   }
 }
