@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 
 import { CommentsSection } from "@/components/board/CommentsSection";
@@ -10,10 +12,12 @@ export function PostDetailShell({
   post,
   backHref = "/",
   editHref,
+  onDelete,
 }: {
   post: Post;
   backHref?: string;
   editHref?: string;
+  onDelete?: () => Promise<void> | void;
 }) {
   return (
     <div className="grid gap-4">
@@ -30,7 +34,17 @@ export function PostDetailShell({
               </Button>
             </Link>
           ) : null}
-          <Button variant="danger" size="sm" disabled>
+          <Button
+            variant="danger"
+            size="sm"
+            disabled={!onDelete}
+            onClick={async () => {
+              if (!onDelete) return;
+              const ok = window.confirm("정말 삭제할까요?");
+              if (!ok) return;
+              await onDelete();
+            }}
+          >
             삭제
           </Button>
         </div>

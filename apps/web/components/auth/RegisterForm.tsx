@@ -1,18 +1,52 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Field } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
+import { API_BASE_URL } from "@/constants/env";
 
 function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }
 
+async function register(input: { email: string; username: string; password: string }) {
+  const response = await fetch(`${API_BASE_URL}/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email: input.email,
+      username: input.username,
+      password: input.password,
+    }),
+  });
+
+  if (response.ok) return;
+
+  let message = `요청 실패 (${response.status})`;
+  try {
+    const contentType = response.headers.get("content-type") ?? "";
+    if (contentType.includes("application/json")) {
+      const data = (await response.json()) as { message?: unknown } | undefined;
+      if (typeof data?.message === "string") message = data.message;
+      if (Array.isArray(data?.message)) message = data.message.join(", ");
+    } else {
+      const text = await response.text();
+      if (text) message = text;
+    }
+  } catch {
+    // ignore
+  }
+
+  throw new Error(message);
+}
+
 export function RegisterForm() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -25,7 +59,7 @@ export function RegisterForm() {
     <Card className="grid gap-5 p-7">
       <form
         className="grid gap-4"
-        onSubmit={(event) => {
+        onSubmit={async (event) => {
           event.preventDefault();
           setError(null);
 
@@ -44,10 +78,14 @@ export function RegisterForm() {
 
           setIsSubmitting(true);
           try {
-            const payload = { email: email.trim(), name: name.trim(), password: password.trim() };
-            window.alert(`회원가입 (데모)\n\n${JSON.stringify(payload, null, 2)}`);
-          } catch {
-            setError("요청 처리에 실패했어요.");
+            await register({
+              email: email.trim(),
+              username: name.trim(),
+              password: password.trim(),
+            });
+            router.replace("/login");
+          } catch (caught) {
+            setError(caught instanceof Error ? caught.message : "요청 처리에 실패했어요.");
           } finally {
             setIsSubmitting(false);
           }
@@ -101,4 +139,3 @@ export function RegisterForm() {
     </Card>
   );
 }
-

@@ -1,10 +1,15 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { cookies } from "next/headers";
 
 import { Container } from "@/components/ui/Container";
 import { LogoMark } from "@/components/ui/LogoMark";
+import { LogoutButton } from "@/components/auth/LogoutButton";
 
-export function AppShell({ children }: { children: ReactNode }) {
+export async function AppShell({ children }: { children: ReactNode }) {
+  const cookieStore = await cookies();
+  const isLoggedIn = Boolean(cookieStore.get("access_token")?.value);
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-10 border-b border-white/30 bg-white/70 backdrop-blur">
@@ -20,12 +25,16 @@ export function AppShell({ children }: { children: ReactNode }) {
           </Link>
 
           <nav className="flex items-center gap-2 text-sm">
-            <Link
-              href="/login"
-              className="rounded-full px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-100"
-            >
-              로그인
-            </Link>
+            {isLoggedIn ? (
+              <LogoutButton />
+            ) : (
+              <Link
+                href="/login"
+                className="rounded-full px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-100"
+              >
+                로그인
+              </Link>
+            )}
           </nav>
         </Container>
       </header>

@@ -1,21 +1,38 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useState } from "react";
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
-import { Field } from "@/components/ui/Field";
-import { Input } from "@/components/ui/Input";
-import { login } from "@/services/auth";
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Field } from '@/components/ui/Field';
+import { Input } from '@/components/ui/Input';
+import { API_BASE_URL } from '@/constants/env';
 
 function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }
 
+async function login(input: { email: string; password: string }) {
+  const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: input.email, password: input.password }),
+    credentials: 'include',
+  });
+
+  if (response.ok) return;
+  if (response.status === 401) {
+    throw new Error('이메일 또는 비밀번호가 올바르지 않습니다.');
+  }
+  throw new Error(`요청 실패 (${response.status})`);
+}
+
 export function LoginForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -30,19 +47,25 @@ export function LoginForm() {
           setError(null);
 
           if (!isValidEmail(email)) {
-            setError("이메일 형식을 확인해주세요.");
+            setError('이메일 형식을 확인해주세요.');
             return;
           }
           if (password.trim().length < 8) {
-            setError("비밀번호는 8자 이상으로 입력해주세요.");
+            setError('비밀번호는 8자 이상으로 입력해주세요.');
             return;
           }
 
           setIsSubmitting(true);
           try {
             await login({ email: email.trim(), password: password.trim() });
+            router.replace('/');
+            router.refresh();
           } catch (caught) {
-            setError(caught instanceof Error ? caught.message : "요청 처리에 실패했어요.");
+            setError(
+              caught instanceof Error
+                ? caught.message
+                : '요청 처리에 실패했어요.',
+            );
           } finally {
             setIsSubmitting(false);
           }
@@ -72,14 +95,19 @@ export function LoginForm() {
         </Field>
 
         {error ? (
-          <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</p>
+          <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            {error}
+          </p>
         ) : null}
 
         <Button type="submit" disabled={!canSubmit || isSubmitting}>
-          {isSubmitting ? "처리 중..." : "로그인"}
+          {isSubmitting ? '처리 중...' : '로그인'}
         </Button>
 
-        <Link href="/register" className="text-center text-sm font-semibold text-slate-700 hover:underline">
+        <Link
+          href="/register"
+          className="text-center text-sm font-semibold text-slate-700 hover:underline"
+        >
           계정이 없나요? 회원가입
         </Link>
       </form>

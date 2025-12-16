@@ -1,18 +1,72 @@
+"use client";
+
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
 import { PostDetailShell } from "@/components/board/PostDetailShell";
 import type { Post } from "@/components/board/types";
+import { API_BASE_URL } from "@/constants/env";
 
-export default function PostDetailPage({ params }: { params: { postId: string } }) {
-  const post: Post = {
-    id: params.postId,
-    title: `게시글 상세 (더미)`,
-    author: "익명",
-    content:
-      "이 화면은 UI 틀만 구현된 상태입니다.\n\n나중에 데이터 로직을 붙이면:\n- params.postId로 게시글 조회\n- 조회 결과를 PostDetailShell에 전달\n\n하면 됩니다.",
-    createdAt: "2025-01-01T09:00:00.000Z",
-    updatedAt: "2025-01-02T10:30:00.000Z",
-  };
+type PostDetailResponse = {
+  id: number;
+  title: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+};
 
+export default function PostDetailPage() {
+  const router = useRouter();
+  const params = useParams<{ postId: string }>();
+  const postId = params.postId;
+
+  const [post, setPost] = useState<Post | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function run() {
+      const response = await fetch(`${API_BASE_URL}/post/${postId}`, {
+        method: "GET",
+        credentials: "include",
+      });
+      if (!response.ok) return;
+
+      const data = (await response.json()) as PostDetailResponse;
+      if (cancelled) return;
+      setPost({
+        id: String(data.id),
+        title: data.title,
+        content: data.content,
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+      });
+    }
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [postId]);
+
+  if (!post) return <div>불러오는 중...</div>;
   return (
-    <PostDetailShell post={post} editHref={`/post/${post.id}/edit`} />
+    <PostDetailShell
+      post={post}
+      editHref={`/post/${postId}/edit`}
+      onDelete={async () => {
+        const response = await fetch(`${API_BASE_URL}/post/${postId}`, {
+          method: "DELETE",
+          credentials: "include",
+        });
+        if (response.status === 401) {
+          router.replace("/login");
+          return;
+        }
+        if (!response.ok) {
+          throw new Error(`요청 실패 (${response.status})`);
+        }
+        router.replace("/");
+      }}
+    />
   );
 }

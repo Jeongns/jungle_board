@@ -6,3 +6,10 @@ export type Post = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type PostListItem = {
+  id: number | string;
+  title: string;
+  author: string;
+  createdAt: string;
+};

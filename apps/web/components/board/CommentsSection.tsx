@@ -1,44 +1,42 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { Textarea } from "@/components/ui/Textarea";
+import { API_BASE_URL } from "@/constants/env";
 
 type Comment = {
-  id: string;
+  id: number;
   name: string;
   content: string;
   createdAt: string;
 };
 
-function makeId() {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
-  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
+type ApiComment = {
+  id: number;
+  username: string;
+  content: string;
+  createdAt: string;
+};
 
 function formatDate(iso: string) {
   const date = new Date(iso);
   return new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium", timeStyle: "short" }).format(date);
 }
 
-function initialDummyComments(postId: string): Comment[] {
-  const now = Date.now();
-  return [
-    {
-      id: `${postId}-c1`,
-      name: "익명",
-      content: "댓글 UI 예시입니다. 데이터 연결은 나중에 붙이면 돼요.",
-      createdAt: new Date(now - 1000 * 60 * 32).toISOString(),
-    },
-    {
-      id: `${postId}-c2`,
-      name: "보드랩",
-      content: "작성 폼에서 이름/내용을 입력해보세요.",
-      createdAt: new Date(now - 1000 * 60 * 8).toISOString(),
-    },
-  ];
+type ApiGetCommentsResponse = {
+  comments: ApiComment[];
+};
+
+function mapComment(comment: ApiComment): Comment {
+  return {
+    id: comment.id,
+    name: comment.username ?? "익명",
+    content: comment.content,
+    createdAt: comment.createdAt,
+  };
 }
 
 function CommentItem({ comment, onDelete }: { comment: Comment; onDelete: () => void }) {
@@ -46,9 +44,6 @@ function CommentItem({ comment, onDelete }: { comment: Comment; onDelete: () => 
     <div className="grid gap-2 px-4 py-4 transition hover:bg-emerald-50/40">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-xs font-black text-emerald-700">
-            {comment.name.trim().slice(0, 1) || "?"}
-          </span>
           <div className="flex flex-col leading-tight">
             <span className="text-sm font-semibold text-slate-900">{comment.name}</span>
             <span className="text-xs text-slate-500">{formatDate(comment.createdAt)}</span>
@@ -64,31 +59,98 @@ function CommentItem({ comment, onDelete }: { comment: Comment; onDelete: () => 
 }
 
 export function CommentsSection({ postId }: { postId: string }) {
-  const [comments, setComments] = useState<Comment[]>(() => initialDummyComments(postId));
+  const [comments, setComments] = useState<Comment[]>([]);
   const [content, setContent] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const canSubmit = content.trim().length > 0;
+
+  useEffect(() => {
+    const numericPostId = Number(postId);
+    if (!Number.isFinite(numericPostId) || numericPostId <= 0) {
+      setComments([]);
+      setError("댓글을 불러올 수 없습니다.");
+      return;
+    }
+
+    let cancelled = false;
+
+    async function load() {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(`${API_BASE_URL}/comment/${numericPostId}`, {
+          method: "GET",
+          credentials: "include",
+        });
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error("로그인이 필요합니다.");
+          }
+          throw new Error(`요청 실패 (${response.status})`);
+        }
+
+        const data = (await response.json()) as ApiGetCommentsResponse;
+        if (cancelled) return;
+        setComments(data.comments.map(mapComment));
+      } catch (caught) {
+        if (cancelled) return;
+        setComments([]);
+        setError(caught instanceof Error ? caught.message : "댓글을 불러오지 못했어요.");
+      } finally {
+        if (cancelled) return;
+        setIsLoading(false);
+      }
+    }
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [postId]);
+
+  async function reload() {
+    const numericPostId = Number(postId);
+    const response = await fetch(`${API_BASE_URL}/comment/${numericPostId}`, {
+      method: "GET",
+      credentials: "include",
+    });
+    if (!response.ok) return;
+    const data = (await response.json()) as ApiGetCommentsResponse;
+    setComments(data.comments.map(mapComment));
+  }
 
   return (
     <div className="grid gap-4">
       <div className="flex items-end justify-between gap-3">
         <div className="grid gap-0.5">
           <h2 className="text-sm font-bold text-slate-900">댓글</h2>
-          <p className="text-xs text-slate-500">총 {comments.length}개</p>
+          <p className="text-xs text-slate-500">
+            {isLoading ? "불러오는 중..." : `총 ${comments.length}개`}
+          </p>
         </div>
       </div>
 
       <div className="grid gap-3">
-        {comments.length ? (
+        {error ? (
+          <div className="rounded-2xl bg-white/40 p-5 text-sm text-slate-600">{error}</div>
+        ) : comments.length ? (
           <div className="overflow-hidden rounded-2xl bg-white/60 divide-y divide-slate-100">
             {comments.map((comment) => (
               <CommentItem
                 key={comment.id}
                 comment={comment}
-                onDelete={() => {
+                onDelete={async () => {
                   const ok = window.confirm("댓글을 삭제할까요?");
                   if (!ok) return;
-                  setComments((prev) => prev.filter((c) => c.id !== comment.id));
+
+                  const response = await fetch(`${API_BASE_URL}/comment/${comment.id}`, {
+                    method: "DELETE",
+                    credentials: "include",
+                  });
+                  if (!response.ok) return;
+                  await reload();
                 }}
               />
             ))}
@@ -102,18 +164,21 @@ export function CommentsSection({ postId }: { postId: string }) {
 
       <form
         className="grid gap-3 rounded-2xl bg-white/60 p-4"
-        onSubmit={(event) => {
+        onSubmit={async (event) => {
           event.preventDefault();
           if (!canSubmit) return;
 
-          const next: Comment = {
-            id: makeId(),
-            name: "익명",
-            content: content.trim(),
-            createdAt: new Date().toISOString(),
-          };
-          setComments((prev) => [next, ...prev]);
+          const numericPostId = Number(postId);
+          const response = await fetch(`${API_BASE_URL}/comment`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ postId: numericPostId, content: content.trim() }),
+            credentials: "include",
+          });
+          if (!response.ok) return;
+
           setContent("");
+          await reload();
         }}
       >
         <Field label="댓글" hint="필수">

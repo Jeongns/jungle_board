@@ -1,6 +1,6 @@
 import { LoginForm } from "@/components/auth/LoginForm";
 
-export default function Login() {
+export default function Login() {  
   return (
     <div className="mx-auto grid w-full max-w-lg gap-4">
       <div className="grid gap-1">

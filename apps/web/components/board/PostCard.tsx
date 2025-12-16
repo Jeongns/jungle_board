@@ -1,14 +1,14 @@
 import Link from "next/link";
 
-import type { Post } from "@/components/board/types";
+import type { PostListItem } from "@/components/board/types";
 
 function formatDate(iso: string) {
   const date = new Date(iso);
   return new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium" }).format(date);
 }
 
-export function PostCard({ post }: { post: Post }) {
-  const author = post.author?.trim() || "익명";
+export function PostCard({ post }: { post: PostListItem }) {
+  const author = post.author.trim() || "익명";
   const created = formatDate(post.createdAt);
 
   return (
