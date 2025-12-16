@@ -37,10 +37,21 @@ export class AuthController {
   @Post('login')
   login(@Res() res: Response, @User() user: AuthenticatedUser) {
     this.logger.log(`Logging in user with id: ${user.id}`);
-    const token = this.authService.getJwtToken(user);
-    res.cookie('access_token', token, {
+    const { access_token } = this.authService.getJwtToken(user);
+    res.cookie('access_token', access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax' as const,
       maxAge: 1000 * 60 * 60, // 1h
     });
+    return res.status(200).json({ ok: true });
+  }
+
+  @Public()
+  @Post('logout')
+  logout(@Res() res: Response) {
+    res.clearCookie('access_token');
+    return res.status(200).json({ ok: true });
   }
 
   @Get('profile')

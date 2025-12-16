@@ -16,7 +16,7 @@ export class AuthService {
     email: string,
     username: string,
     password: string,
-  ): Promise<User> {
+  ): Promise<AuthenticatedUser> {
     const duplicateUser = await this.usersService.findOneByEmail(email);
 
     if (duplicateUser) {
@@ -26,7 +26,8 @@ export class AuthService {
     const salt = await bcrypt.genSalt();
     const hash = await bcrypt.hash(password, salt);
 
-    return this.usersService.createUser(email, username, hash);
+    const user = await this.usersService.createUser(email, username, hash);
+    return { id: user.id, username: user.username };
   }
 
   async validateUser(
