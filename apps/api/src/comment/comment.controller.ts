@@ -12,6 +12,7 @@ import { CreateCommentRequest } from './dto/create-comment.dto';
 import { UpdateCommentRequest } from './dto/update-comment.dto';
 import { User } from 'src/auth/decorators/user.decorator';
 import type { AuthenticatedUser } from 'src/common/types/authenticated-user';
+import { PostCommentsResponse } from './dto/get-comments.dto';
 
 @Controller('comment')
 export class CommentController {
@@ -30,8 +31,9 @@ export class CommentController {
   }
 
   @Get(':id')
-  getComments(@Param('id') id: number) {
-    return this.commentService.getCommentsByPostId(id);
+  async getComments(@Param('id') id: number) {
+    const comments = await this.commentService.getCommentsByPostId(id);
+    return PostCommentsResponse.PostCommentsToDto(comments);
   }
 
   @Patch(':id')

@@ -1,21 +1,25 @@
 import { Comment } from 'generated/prisma/client';
 
 export class PostCommentsResponse {
-  constructor(datas: (Comment & { User: { username: string } })[]) {
-    this.comments = datas.map(
-      (data) =>
-        new PostComment(
-          data.id,
-          data.User.username,
-          data.content,
-          data.postId,
-          data.userId,
-          data.createdAt,
-          data.updatedAt,
-        ),
+  static PostCommentsToDto(
+    datas: (Comment & { User: { username: string } })[],
+  ) {
+    return new PostCommentsResponse(
+      datas.map(
+        (data) =>
+          new PostComment(
+            data.id,
+            data.User.username,
+            data.content,
+            data.postId,
+            data.userId,
+            data.createdAt,
+            data.updatedAt,
+          ),
+      ),
     );
   }
-  comments: PostComment[];
+  constructor(public comments: PostComment[]) {}
 }
 
 class PostComment {

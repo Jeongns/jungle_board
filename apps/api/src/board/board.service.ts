@@ -18,6 +18,7 @@ export class BoardService {
         select: {
           id: true,
           title: true,
+          createdAt: true,
           author: { select: { username: true } },
         },
         skip: skip,

@@ -1,4 +1,5 @@
-import { IsNumber, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsInt, IsOptional, Max, Min } from 'class-validator';
 import { Post, User } from 'generated/prisma/client';
 import { Pagination } from 'src/common/types/pagination';
 
@@ -6,10 +7,17 @@ export class BoardPageReqeust {
   @IsOptional()
   search: string = '';
 
-  @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
   page: number = 1;
 
-  @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(50)
   limit: number = 10;
 }
 
@@ -25,7 +33,13 @@ export class BoardPageReponse implements Pagination<PageInfo> {
       totalCount,
       limit,
       posts.map(
-        (item) => new PageInfo(item.id, item.title, item.author.username),
+        (item) =>
+          new PageInfo(
+            item.id,
+            item.title,
+            item.author.username,
+            item.createdAt,
+          ),
       ),
     );
   }
@@ -40,5 +54,6 @@ class PageInfo {
     public id: number,
     public title: string,
     public username: string,
+    public createdAt: Date,
   ) {}
 }
