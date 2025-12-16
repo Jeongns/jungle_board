@@ -3,12 +3,16 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { jwtConstants } from 'src/auth/constants';
 import { JwtPayload } from 'src/auth/types/jwt-payload';
+import { Request } from 'express';
+
+// eslint-disable-next-line @typescript-eslint/no-unsafe-return
+const cookieExtractor = (req: Request) => req?.cookies?.access_token ?? null;
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor]),
       ignoreExpiration: false,
       secretOrKey: jwtConstants.secret,
     });
