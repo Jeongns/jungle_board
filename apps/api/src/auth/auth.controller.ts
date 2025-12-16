@@ -18,7 +18,7 @@ export class AuthController {
 
     return this.authService.register(
       registUserRequest.email,
-      registUserRequest.email,
+      registUserRequest.username,
       registUserRequest.password,
     );
   }

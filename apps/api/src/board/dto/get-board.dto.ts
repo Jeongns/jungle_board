@@ -1,5 +1,5 @@
 import { IsNumber, IsOptional } from 'class-validator';
-import { Post, User } from 'generated/prisma/browser';
+import { Post, User } from 'generated/prisma/client';
 import { Pagination } from 'src/common/types/pagination';
 
 export class BoardPageReqeust {

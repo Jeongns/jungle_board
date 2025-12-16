@@ -30,25 +30,25 @@ export class CommentController {
   }
 
   @Get(':id')
-  getComments(@Param('id') id: string) {
-    return this.commentService.getCommentsByPostId(+id);
+  getComments(@Param('id') id: number) {
+    return this.commentService.getCommentsByPostId(id);
   }
 
   @Patch(':id')
   update(
     @User() user: AuthenticatedUser,
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updateCommentRequest: UpdateCommentRequest,
   ) {
     return this.commentService.updateComment(
-      +id,
+      id,
       user.id,
       updateCommentRequest.content,
     );
   }
 
   @Delete(':id')
-  remove(@User() user: AuthenticatedUser, @Param('id') id: string) {
-    return this.commentService.removeComment(+id, user.id);
+  remove(@User() user: AuthenticatedUser, @Param('id') id: number) {
+    return this.commentService.removeComment(id, user.id);
   }
 }

@@ -33,20 +33,20 @@ export class PostController {
   @Get(':id')
   async getPostDetail(
     @User() user: AuthenticatedUser,
-    @Param('id') id: string,
+    @Param('id') id: number,
   ) {
-    const post = await this.postService.getPost(+id);
+    const post = await this.postService.getPost(id);
     return GetPostResponse.postToDto(user.id, post);
   }
 
   @Patch(':id')
   update(
     @User() user: AuthenticatedUser,
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updatePostRequest: UpdatePostRequest,
   ) {
     return this.postService.updatePost(
-      +id,
+      id,
       user.id,
       updatePostRequest.title,
       updatePostRequest.content,
@@ -54,7 +54,7 @@ export class PostController {
   }
 
   @Delete(':id')
-  remove(@User() user: AuthenticatedUser, @Param('id') id: string) {
-    return this.postService.removePost(+id, user.id);
+  remove(@User() user: AuthenticatedUser, @Param('id') id: number) {
+    return this.postService.removePost(id, user.id);
   }
 }

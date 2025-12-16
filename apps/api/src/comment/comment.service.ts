@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Comment } from 'generated/prisma/browser';
+import { Comment } from 'generated/prisma/client';
 
 @Injectable()
 export class CommentService {
@@ -42,7 +42,7 @@ export class CommentService {
     content: string,
   ): Promise<Comment> {
     const comment = await this.getComment(id);
-    if (comment.id != userId) {
+    if (comment.userId != userId) {
       throw new ForbiddenException('You are not the author of this comment');
     }
 
@@ -54,7 +54,7 @@ export class CommentService {
 
   async removeComment(id: number, userId: number): Promise<Comment> {
     const comment = await this.getComment(id);
-    if (comment.id != userId) {
+    if (comment.userId != userId) {
       throw new ForbiddenException('You are not the author of this comment');
     }
 

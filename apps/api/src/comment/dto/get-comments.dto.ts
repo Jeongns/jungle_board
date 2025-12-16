@@ -1,4 +1,4 @@
-import { Comment } from 'generated/prisma/browser';
+import { Comment } from 'generated/prisma/client';
 
 export class PostCommentsResponse {
   constructor(datas: (Comment & { User: { username: string } })[]) {

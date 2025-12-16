@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BoardPageReponse } from './dto/get-board.dto';
-import { Post, User } from 'generated/prisma/browser';
+import { Post, User } from 'generated/prisma/client';
 
 @Injectable()
 export class BoardService {
@@ -25,7 +25,7 @@ export class BoardService {
         orderBy: { createdAt: 'desc' },
         where: { title: { contains: safeSearch } },
       }),
-      this.prisma.post.count(),
+      this.prisma.post.count({ where: { title: { contains: safeSearch } } }),
     ]);
 
     return BoardPageReponse.paginatedPostsToDto(

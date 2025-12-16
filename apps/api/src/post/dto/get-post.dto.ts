@@ -1,4 +1,4 @@
-import { Post } from 'generated/prisma/browser';
+import { Post } from 'generated/prisma/client';
 
 export class GetPostResponse {
   static postToDto(userId: number, post: Post) {
