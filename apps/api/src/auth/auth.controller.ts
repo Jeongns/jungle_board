@@ -1,10 +1,19 @@
-import { Controller, Post, UseGuards, Get, Body, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  UseGuards,
+  Get,
+  Body,
+  Logger,
+  Res,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guard/local-auth.guard';
 import { Public } from './decorators/public.decorator';
 import { User } from './decorators/user.decorator';
 import type { AuthenticatedUser } from 'src/common/types/authenticated-user';
 import { RegistUserRequest } from './dto/regist-user.dto';
+import type { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -26,9 +35,12 @@ export class AuthController {
   @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  login(@User() user: AuthenticatedUser) {
+  login(@Res() res: Response, @User() user: AuthenticatedUser) {
     this.logger.log(`Logging in user with id: ${user.id}`);
-    return this.authService.getJwtToken(user);
+    const token = this.authService.getJwtToken(user);
+    res.cookie('access_token', token, {
+      maxAge: 1000 * 60 * 60, // 1h
+    });
   }
 
   @Get('profile')
