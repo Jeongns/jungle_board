@@ -5,6 +5,7 @@ export type Post = {
   content: string;
   createdAt: string;
   updatedAt: string;
+  isMine?: boolean;
 };
 
 export type PostListItem = {

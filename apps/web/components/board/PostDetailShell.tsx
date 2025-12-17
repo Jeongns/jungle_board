@@ -34,19 +34,19 @@ export function PostDetailShell({
               </Button>
             </Link>
           ) : null}
-          <Button
-            variant="danger"
-            size="sm"
-            disabled={!onDelete}
-            onClick={async () => {
-              if (!onDelete) return;
-              const ok = window.confirm("정말 삭제할까요?");
-              if (!ok) return;
-              await onDelete();
-            }}
-          >
-            삭제
-          </Button>
+          {onDelete ? (
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={async () => {
+                const ok = window.confirm("정말 삭제할까요?");
+                if (!ok) return;
+                await onDelete();
+              }}
+            >
+              삭제
+            </Button>
+          ) : null}
         </div>
       </div>
 
