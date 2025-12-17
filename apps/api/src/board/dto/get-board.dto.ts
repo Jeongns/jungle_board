@@ -21,7 +21,7 @@ export class BoardPageReqeust {
   limit: number = 10;
 }
 
-export class BoardPageReponse implements Pagination<PageInfo> {
+export class BoardPageReponse extends Pagination<PageInfo> {
   static paginatedPostsToDto(
     page: number,
     totalCount: number,
@@ -43,10 +43,6 @@ export class BoardPageReponse implements Pagination<PageInfo> {
       ),
     );
   }
-  page: number;
-  totalCount: number;
-  limit: number;
-  items: PageInfo[];
 }
 
 class PageInfo {
