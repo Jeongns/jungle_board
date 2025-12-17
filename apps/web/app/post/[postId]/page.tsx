@@ -13,6 +13,7 @@ type PostDetailResponse = {
   content: string;
   createdAt: string;
   updatedAt: string;
+  isMine: boolean;
 };
 
 export default function PostDetailPage() {
@@ -39,6 +40,7 @@ export default function PostDetailPage() {
         content: data.content,
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
+        isMine: data.isMine,
       });
     }
 
@@ -52,21 +54,25 @@ export default function PostDetailPage() {
   return (
     <PostDetailShell
       post={post}
-      editHref={`/post/${postId}/edit`}
-      onDelete={async () => {
-        const response = await fetch(`${API_BASE_URL}/post/${postId}`, {
-          method: "DELETE",
-          credentials: "include",
-        });
-        if (response.status === 401) {
-          router.replace("/login");
-          return;
-        }
-        if (!response.ok) {
-          throw new Error(`요청 실패 (${response.status})`);
-        }
-        router.replace("/");
-      }}
+      editHref={post.isMine ? `/post/${postId}/edit` : undefined}
+      onDelete={
+        post.isMine
+          ? async () => {
+              const response = await fetch(`${API_BASE_URL}/post/${postId}`, {
+                method: "DELETE",
+                credentials: "include",
+              });
+              if (response.status === 401) {
+                router.replace("/login");
+                return;
+              }
+              if (!response.ok) {
+                throw new Error(`요청 실패 (${response.status})`);
+              }
+              router.replace("/");
+            }
+          : undefined
+      }
     />
   );
 }
